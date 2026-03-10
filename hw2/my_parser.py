@@ -68,6 +68,25 @@ def transformDollar(money):
         return money
     return sub(r'[^\d.]', '', money)
 
+
+seen_users = set()
+users_file = open('Users.dat', 'w')
+items_file = open('Items.dat', 'w')
+bids_file = open('Bids.dat', 'w')
+
+def quotes(val): return '"' + str(val).replace('"', '""') + '"'
+
+def user_file_writer(user_id, rating, location, country):
+    if user_id not in seen_users:
+        seen_users.add(user_id)
+        row = columnSeparator.join([
+            user_id,
+            rating,
+            quotes(location),
+            quotes(country)
+        ])
+        users_file.write(row + '\n')
+
 """
 Parses a single json file. Currently, there's a loop that iterates over each
 item in the data set. Your job is to extend this functionality to create all
@@ -82,7 +101,53 @@ def parseJson(json_file):
             given `json_file' and generate the necessary .dat files to generate
             the SQL tables based on your relation design
             """
-            pass
+            item_id = item['ItemID']
+            seller = item['Seller']
+            seller_id = seller['UserID']
+            bids = item.get('Bids') or []
+
+            user_file_writer(
+                seller_id,
+                seller['Rating'],
+                item.get('Location'),
+                item.get('Country')
+            )
+
+            buy_price = transformDollar(item.get('Buy_Price'))
+            row = columnSeparator.join([
+                item_id,
+                quotes(item['Name']),
+                item['Currently'],
+                buy_price if buy_price else 'NULL',
+                transformDollar(item['First_Bid']),
+                item['Number_of_Bids'],
+                quotes(item.get('Location')),
+                quotes(item.get('Country')),
+                quotes(transformDttm(item['Started'])),
+                quotes(transformDttm(item['Ends'])),
+                quotes(item.get('Description')),
+                seller_id
+            ])
+            items_file.write(row + '\n')
+
+            for bid_wrapper in bids:
+                bid = bid_wrapper['Bid']
+                bidder = bid['Bidder']
+
+                user_file_writer(
+                    bidder['UserID'],
+                    bidder['Rating'],
+                    bidder.get('Location'),
+                    bidder.get('Country'),
+                )
+
+                bid_row = columnSeparator.join([
+                    bidder['UserID'],
+                    item_id,
+                    quotes(transformDttm(bid['Time'])),
+                    transformDollar(bid['Amount'])
+                ])
+                bids_file.write(bid_row + '\n')
 
 """
 Loops through each json files provided on the command line and passes each file
@@ -97,6 +162,10 @@ def main(argv):
         if isJson(f):
             parseJson(f)
             print ("Success parsing " + f)
+
+    users_file.close()
+    items_file.close()
+    bids_file.close()
 
 if __name__ == '__main__':
     main(sys.argv)
