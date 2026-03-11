@@ -70,9 +70,12 @@ def transformDollar(money):
 
 
 seen_users = set()
+seen_cats = set()
+
 users_file = open('Users.dat', 'w')
 items_file = open('Items.dat', 'w')
 bids_file = open('Bids.dat', 'w')
+cats_file = open('ItemCategories.dat', 'w')
 
 def quotes(val): return '"' + str(val).replace('"', '""') + '"'
 
@@ -117,7 +120,7 @@ def parseJson(json_file):
             row = columnSeparator.join([
                 item_id,
                 quotes(item['Name']),
-                item['Currently'],
+                transformDollar(item['Currently']),
                 buy_price if buy_price else 'NULL',
                 transformDollar(item['First_Bid']),
                 item['Number_of_Bids'],
@@ -129,6 +132,16 @@ def parseJson(json_file):
                 seller_id
             ])
             items_file.write(row + '\n')
+
+            for category in item.get('Category', []):
+                key = (item_id, category)
+                if key not in seen_cats:
+                    seen_cats.add(key)
+                    cat_row = columnSeparator.join([
+                        item_id,
+                        quotes(category)
+                    ])
+                    cats_file.write(cat_row + '\n')
 
             for bid_wrapper in bids:
                 bid = bid_wrapper['Bid']
@@ -157,15 +170,30 @@ def main(argv):
     if len(argv) < 2:
         print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
         sys.exit(1)
-    # loops over all .json files in the argument
-    for f in argv[1:]:
+
+    import glob
+    files = []
+    for arg in argv[1:]:
+        expanded = glob.glob(arg)
+        if expanded:
+            files.extend(expanded)
+        else:
+            files.append(arg)
+    for f in files:
         if isJson(f):
             parseJson(f)
-            print ("Success parsing " + f)
+            print("Success parsing " + f)
+
+    # loops over all .json files in the argument
+    # for f in argv[1:]:
+      #  if isJson(f):
+       #     parseJson(f)
+        #    print ("Success parsing " + f)
 
     users_file.close()
     items_file.close()
     bids_file.close()
+    cats_file.close()
 
 if __name__ == '__main__':
     main(sys.argv)
