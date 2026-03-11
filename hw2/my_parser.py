@@ -68,7 +68,7 @@ def transformDollar(money):
         return money
     return sub(r'[^\d.]', '', money)
 
-
+# Used for deduplication
 seen_users = set()
 seen_cats = set()
 
@@ -77,8 +77,10 @@ items_file = open('Items.dat', 'w')
 bids_file = open('Bids.dat', 'w')
 cats_file = open('ItemCategories.dat', 'w')
 
+# Used to handle unexpected quotation marks in strings
 def quotes(val): return '"' + str(val).replace('"', '""') + '"'
 
+# Separated with intention of doing this for all, but got lazy and figured it doesn't make a big difference.
 def user_file_writer(user_id, rating, location, country):
     if user_id not in seen_users:
         seen_users.add(user_id)

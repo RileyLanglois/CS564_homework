@@ -1,7 +1,7 @@
-select count(distinct ic.Category)
-from ItemCategories ic
-where ic.ItemID in (
-    select ItemID
-    from Bids
-    where Amount > 100.00
+SELECT COUNT(DISTINCT ic.Category)
+FROM ItemCategories ic
+WHERE ic.ItemID IN (
+    SELECT ItemID
+    FROM Bids
+    WHERE Amount > 100.00
 );

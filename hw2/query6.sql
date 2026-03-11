@@ -1,4 +1,4 @@
-select count(*)
-from Users
-where UserID in (select SellerID from Items)
-AND UserID in (select userID from Bids);
+SELECT COUNT(*)
+FROM Users
+WHERE UserID IN (SELECT SellerID FROM Items)
+AND UserID IN (SELECT UserID FROM Bids);

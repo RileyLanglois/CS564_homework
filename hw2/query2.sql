@@ -1,3 +1,3 @@
-select count(*)
-from Users
-where Location = 'New York';
+SELECT COUNT(*)
+FROM Users
+WHERE Location = 'New York';

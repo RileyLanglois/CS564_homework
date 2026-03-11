@@ -1,4 +1,4 @@
-select count(*)
-from Users
-where UserID in (select SellerID from Items)
+SELECT COUNT(*)
+FROM Users
+WHERE UserID IN (SELECT SellerID FROM Items)
 AND Rating > 1000;
