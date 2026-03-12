@@ -173,24 +173,11 @@ def main(argv):
         print >> sys.stderr, 'Usage: python skeleton_json_parser.py <path to json files>'
         sys.exit(1)
 
-    import glob
-    files = []
-    for arg in argv[1:]:
-        expanded = glob.glob(arg)
-        if expanded:
-            files.extend(expanded)
-        else:
-            files.append(arg)
-    for f in files:
+    # loops over all .json files in the argument
+    for f in argv[1:]:
         if isJson(f):
             parseJson(f)
-            print("Success parsing " + f)
-
-    # loops over all .json files in the argument
-    # for f in argv[1:]:
-      #  if isJson(f):
-       #     parseJson(f)
-        #    print ("Success parsing " + f)
+            print ("Success parsing " + f)
 
     users_file.close()
     items_file.close()
